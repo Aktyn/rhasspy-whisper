@@ -12,4 +12,4 @@ if [[ -d "${venv}" ]]; then
 fi
 
 export PYTHONPATH="${src_dir}:${PYTHONPATH}"
-python3 -m rhasspysilence "$@"
+python3 -m rhasspywhisper "$@"

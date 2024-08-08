@@ -1,7 +1,7 @@
-"""Tests for rhasspysilence."""
+"""Tests for rhasspywhisper."""
 import wave
 
-from rhasspysilence import VoiceCommandResult, WebRtcVadRecorder
+from rhasspywhisper import VoiceCommandResult, WebRtcVadRecorder
 
 CHUNK_SIZE = 2048
 

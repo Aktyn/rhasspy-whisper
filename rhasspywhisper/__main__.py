@@ -1,4 +1,4 @@
-"""Command-line interface to rhasspysilence."""
+"""Command-line interface to rhasspywhisper."""
 import argparse
 import io
 import logging
@@ -27,12 +27,12 @@ class OutputType(str, Enum):
 # -----------------------------------------------------------------------------
 
 
-_LOGGER = logging.getLogger("rhasspysilence")
+_LOGGER = logging.getLogger("rhasspywhisper")
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(prog="rhasspy-silence")
+    parser = argparse.ArgumentParser(prog="rhasspy-whisper")
     parser.add_argument(
         "--output-type",
         default=OutputType.SPEECH_SILENCE,

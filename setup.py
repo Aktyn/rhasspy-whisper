@@ -1,4 +1,4 @@
-"""Setup script for rhasspy-silence package"""
+"""Setup script for rhasspy-whisper package"""
 from pathlib import Path
 
 import setuptools
@@ -22,13 +22,13 @@ with open(version_path, "r") as version_file:
     version = version_file.read().strip()
 
 setuptools.setup(
-    name="rhasspy-silence",
+    name="rhasspy-whisper",
     version=version,
     author="Michael Hansen",
     author_email="mike@rhasspy.org",
-    url="https://github.com/rhasspy/rhasspy-silence",
+    url="https://github.com/Aktyn/rhasspy-whisper",
     packages=setuptools.find_packages(),
-    package_data={"rhasspysilence": ["py.typed"]},
+    package_data={"rhasspywhisper": ["py.typed"]},
     install_requires=requirements,
     classifiers=[
         "Programming Language :: Python :: 3",

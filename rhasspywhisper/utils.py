@@ -1,16 +1,17 @@
-"""Utility methods for rhasspysilence."""
+"""Utility methods for rhasspywhisper."""
 from . import WebRtcVadRecorder
+
 
 # -----------------------------------------------------------------------------
 
 
 def trim_silence(
-    audio_bytes: bytes,
-    ratio_threshold: float = 20.0,
-    chunk_size: int = 960,
-    skip_first_chunk=True,
-    keep_chunks_before: int = 0,
-    keep_chunks_after: int = 0,
+        audio_bytes: bytes,
+        ratio_threshold: float = 20.0,
+        chunk_size: int = 960,
+        skip_first_chunk=True,
+        keep_chunks_before: int = 0,
+        keep_chunks_after: int = 0,
 ) -> bytes:
     """Trim silence from start and end of audio using ratio of max/current energy."""
     first_chunk = False
@@ -24,7 +25,7 @@ def trim_silence(
             first_chunk = True
             continue
 
-        energy = max(1, WebRtcVadRecorder.get_debiased_energy(chunk))
+        energy = max(1., WebRtcVadRecorder.get_debiased_energy(chunk))
         energies.append((energy, chunk))
 
         if (max_energy is None) or (energy > max_energy):
@@ -54,7 +55,7 @@ def trim_silence(
     end_index = min(len(energies) - 1, end_index + 1 + keep_chunks_after)
 
     keep_bytes = bytes()
-    for _, chunk in energies[start_index : end_index + 1]:
+    for _, chunk in energies[start_index: end_index + 1]:
         keep_bytes += chunk
 
     return keep_bytes

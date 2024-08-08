@@ -1,7 +1,7 @@
-# Rhasspy Silence
+# Rhasspy Whisper
 
-[![Continuous Integration](https://github.com/rhasspy/rhasspy-silence/workflows/Tests/badge.svg)](https://github.com/rhasspy/rhasspy-silence/actions)
-[![GitHub license](https://img.shields.io/github/license/rhasspy/rhasspy-silence.svg)](https://github.com/rhasspy/rhasspy-silence/blob/master/LICENSE)
+[![Continuous Integration](https://github.com/Aktyn/rhasspy-whisper/workflows/Tests/badge.svg)](https://github.com/Aktyn/rhasspy-whisper/actions)
+[![GitHub license](https://img.shields.io/github/license/rhasspy/rhasspy-whisper.svg)](https://github.com/Aktyn/rhasspy-whisper/blob/master/LICENSE)
 
 Detect speech/silence in voice commands with [webrtcvad](https://github.com/wiseman/py-webrtcvad).
 
@@ -13,8 +13,8 @@ Detect speech/silence in voice commands with [webrtcvad](https://github.com/wise
 ## Installation
 
 ```bash
-$ git clone https://github.com/rhasspy/rhasspy-silence
-$ cd rhasspy-silence
+$ git clone https://github.com/Aktyn/rhasspy-whisper
+$ cd rhasspy-whisper
 $ ./configure
 $ make
 $ make install
@@ -22,7 +22,7 @@ $ make install
 
 ## How it Works
 
-`rhasspy-silence` uses a state machine to decide when a voice command has started and stopped. The variables that control this machine are:
+`rhasspy-whisper` uses a state machine to decide when a voice command has started and stopped. The variables that control this machine are:
 
 * `skip_seconds` - seconds of audio to skip before voice command detection starts
 * `speech_seconds` - seconds of speech before voice command has begun
@@ -53,13 +53,13 @@ Both of the energy methods can be combined with `webrtcvad`. When combined, audi
 
 # Command Line Interface
 
-A CLI is included to test out the different parameters and silence detection methods. After installation, pipe raw 16-bit 16Khz mono audo to the `bin/rhasspy-silence` script:
+A CLI is included to test out the different parameters and silence detection methods. After installation, pipe raw 16-bit 16Khz mono audo to the `bin/rhasspy-whisper` script:
 
 ```sh
-$ arecord -r 16000 -f S16_LE -c 1 -t raw | bin/rhasspy-silence <ARGS>
+$ arecord -r 16000 -f S16_LE -c 1 -t raw | bin/rhasspy-whisper <ARGS>
 ```
 
-The characters printed to the console indicate how `rhasspy-silence` is classifying audio frames:
+The characters printed to the console indicate how `rhasspy-whisper` is classifying audio frames:
 
 * `.` - silence
 * `!` - speech
@@ -73,10 +73,10 @@ By changing the `--output-type` argument, you can have the current audio energy 
 
 ## Splitting By Silence
 
-You can use `rhasspy-silence` to split audio into WAV files by silence using:
+You can use `rhasspy-whisper` to split audio into WAV files by silence using:
 
 ```sh
-$ sox audio.wav -t raw - | bin/rhasspy-silence --quiet --split-dir splits --trim-silence
+$ sox audio.wav -t raw - | bin/rhasspy-whisper --quiet --split-dir splits --trim-silence
 ```
 
 This will split raw 16Khz 16-bit PCM audio into WAV files in a directory named `splits`.
@@ -89,7 +89,7 @@ Adding `--trim-silence` is optional, and can be controlled further with other `-
 Silence can be trimmed from the start and end of an audio file with:
 
 ```sh
-$ sox audio.wav -t raw - | bin/rhasspy-silence --quiet --trim-silence > trimmed.wav
+$ sox audio.wav -t raw - | bin/rhasspy-whisper --quiet --trim-silence > trimmed.wav
 ```
 
 See the other `--trim-*` options with `--help` for more control.
@@ -97,7 +97,7 @@ See the other `--trim-*` options with `--help` for more control.
 ## CLI Arguments
 
 ```
-usage: rhasspy-silence [-h]
+usage: rhasspy-whisper [-h]
                        [--output-type {speech_silence,current_energy,max_current_ratio,none}]
                        [--chunk-size CHUNK_SIZE] [--skip-seconds SKIP_SECONDS]
                        [--max-seconds MAX_SECONDS] [--min-seconds MIN_SECONDS]
