@@ -36,7 +36,7 @@ def main():
 
     whisper = None
     if args.output_type == OutputType.TRANSCRIPTION:
-        whisper = Whisper()
+        whisper = Whisper(download_root=args.models_dir)
 
     print("Reading raw 16Khz mono audio from stdin...", file=sys.stderr)
 
@@ -126,7 +126,11 @@ def main():
                         )
 
                     try:
-                        transcription = whisper.transcribe(audio_bytes, recorder.sample_rate)
+                        transcription = whisper.transcribe(
+                            audio_bytes=audio_bytes,
+                            sample_rate=recorder.sample_rate,
+                            audio_output_dir=args.audio_output_dir
+                        )
                         _LOGGER.info(transcription)
                     except Exception as e:
                         _LOGGER.error(e)

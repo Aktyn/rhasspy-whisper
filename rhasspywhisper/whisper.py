@@ -1,6 +1,7 @@
 import os
 import wave
 import uuid
+
 from faster_whisper import WhisperModel
 
 
@@ -13,20 +14,21 @@ from faster_whisper import WhisperModel
 # distil-large-v2, distil-medium.en, distil-small.en
 
 class Whisper:
-    def __init__(self, model_size='small.en'):
-        self.model_size = model_size
+    def __init__(self, model_size='small.en', download_root='models'):
+        os.makedirs(download_root, exist_ok=True)
         # self.model = WhisperModel(model_size, device="cuda", compute_type="float32", download_root='./models')
         # self.model = WhisperModel(model_size, device="cuda", compute_type="int8_float16", download_root='./models')
         # self.model = WhisperModel(model_size, device="cpu", compute_type="int8", download_root='./models')
-        self.model = WhisperModel(model_size, device="cpu", compute_type="auto", download_root='./models')
+        self.model = WhisperModel(model_size, device="cpu", compute_type="auto", download_root=download_root)
 
-    def transcribe(self, audio_bytes: bytes, sample_rate: int):
+    def transcribe(self, audio_bytes: bytes, sample_rate: int, audio_output_dir='output'):
 
         # TODO: test (maybe processing and saving to file with wave is not needed)
         # audio = np.frombuffer(audio_bytes, dtype=np.int16)
         # audio = audio.astype(np.float32) / 32768.0  # Normalize to [-1, 1]
 
-        file_path: str = f'./output/transcription_{uuid.uuid4()}.wav'
+        os.makedirs(audio_output_dir, exist_ok=True)
+        file_path = os.path.join(audio_output_dir, f'transcription_{uuid.uuid4()}.wav')
         wav_file: wave.Wave_write = wave.open(file_path, "wb")
         with wav_file:
             wav_file.setframerate(sample_rate)

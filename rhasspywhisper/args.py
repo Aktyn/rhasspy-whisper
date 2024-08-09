@@ -86,6 +86,9 @@ def parse_args():
         "--split-dir",
         help="Split incoming audio by silence and write WAV file(s) to directory",
     )
+    parser.add_argument("--audio-output-dir",
+                        default="output",
+                        help="Similar to --split-dir, but for temporary audio files used for whisper")
     parser.add_argument(
         "--split-format",
         default="{}.wav",
@@ -126,4 +129,8 @@ def parse_args():
     parser.add_argument(
         "--debug", action="store_true", help="Print DEBUG messages to the console"
     )
+
+    parser.add_argument("--models-dir", default="models",
+                        help="Directory for automatically downloading whisper models")
+
     return parser.parse_args()
