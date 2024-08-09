@@ -12,7 +12,7 @@ from .utils import trim_silence
 from .args import parse_args
 from .whisper import Whisper
 
-_LOGGER = logging.getLogger("rhasspywhisper")
+_LOGGER = logging.getLogger("rhasspy-whisper")
 
 
 def main():

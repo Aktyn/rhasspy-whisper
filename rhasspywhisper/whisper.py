@@ -1,5 +1,4 @@
 import os
-import time
 import wave
 import uuid
 from faster_whisper import WhisperModel
@@ -22,7 +21,6 @@ class Whisper:
         self.model = WhisperModel(model_size, device="cpu", compute_type="auto", download_root='./models')
 
     def transcribe(self, audio_bytes: bytes, sample_rate: int):
-        start_time = time.time()
 
         # TODO: test (maybe processing and saving to file with wave is not needed)
         # audio = np.frombuffer(audio_bytes, dtype=np.int16)
@@ -57,10 +55,8 @@ class Whisper:
         except OSError as e:
             print("Error: %s - %s." % (e.filename, e.strerror))
 
+        output = ""
         for segment in segments:
-            print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+            output += segment.text + "\n"
 
-        elapsed_time = time.time() - start_time
-        print(f"Transcription took {elapsed_time:.2f} seconds")
-
-        return "test"
+        return output
