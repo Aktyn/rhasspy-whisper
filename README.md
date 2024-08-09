@@ -1,4 +1,5 @@
 # Rhasspy Whisper
+## Fork of [Rhasspy Silence](https://github.com/rhasspy/rhasspy-silence) with added [Faster Whisper](https://github.com/SYSTRAN/faster-whisper) for speech transcription
 
 [![Continuous Integration](https://github.com/Aktyn/rhasspy-whisper/workflows/Tests/badge.svg)](https://github.com/Aktyn/rhasspy-whisper/actions)
 [![GitHub license](https://img.shields.io/github/license/rhasspy/rhasspy-whisper.svg)](https://github.com/Aktyn/rhasspy-whisper/blob/master/LICENSE)
@@ -98,7 +99,7 @@ See the other `--trim-*` options with `--help` for more control.
 
 ```
 usage: rhasspy-whisper [-h]
-                       [--output-type {speech_silence,current_energy,max_current_ratio,none}]
+                       [--output-type {speech_silence,current_energy,max_current_ratio,transcription,none}]
                        [--chunk-size CHUNK_SIZE] [--skip-seconds SKIP_SECONDS]
                        [--max-seconds MAX_SECONDS] [--min-seconds MIN_SECONDS]
                        [--speech-seconds SPEECH_SECONDS]
@@ -117,7 +118,7 @@ usage: rhasspy-whisper [-h]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --output-type {speech_silence,current_energy,max_current_ratio,none}
+  --output-type {speech_silence,current_energy,max_current_ratio,transcription,none}
                         Type of printed output
   --chunk-size CHUNK_SIZE
                         Size of audio chunks. Must be 10, 20, or 30 ms for

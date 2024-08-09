@@ -1,160 +1,23 @@
 """Command-line interface to rhasspywhisper."""
-import argparse
 import io
 import logging
 import sys
 import typing
 import wave
-from enum import Enum
 from pathlib import Path
 
 from . import WebRtcVadRecorder
-from .const import SilenceMethod, VoiceCommandEventType
+from .const import VoiceCommandEventType, OutputType
 from .utils import trim_silence
-
-# -----------------------------------------------------------------------------
-
-
-class OutputType(str, Enum):
-    """Type of printed output."""
-
-    SPEECH_SILENCE = "speech_silence"
-    CURRENT_ENERGY = "current_energy"
-    MAX_CURRENT_RATIO = "max_current_ratio"
-    NONE = "none"
-
-
-# -----------------------------------------------------------------------------
-
+from .args import parse_args
+from .whisper import Whisper
 
 _LOGGER = logging.getLogger("rhasspywhisper")
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(prog="rhasspy-whisper")
-    parser.add_argument(
-        "--output-type",
-        default=OutputType.SPEECH_SILENCE,
-        choices=[e.value for e in OutputType],
-        help="Type of printed output",
-    )
-    parser.add_argument(
-        "--chunk-size",
-        type=int,
-        default=960,
-        help="Size of audio chunks. Must be 10, 20, or 30 ms for VAD.",
-    )
-    parser.add_argument(
-        "--skip-seconds",
-        type=float,
-        default=0.0,
-        help="Seconds of audio to skip before a voice command",
-    )
-    parser.add_argument(
-        "--max-seconds",
-        type=float,
-        help="Maximum number of seconds for a voice command",
-    )
-    parser.add_argument(
-        "--min-seconds",
-        type=float,
-        default=1.0,
-        help="Minimum number of seconds for a voice command",
-    )
-    parser.add_argument(
-        "--speech-seconds",
-        type=float,
-        default=0.3,
-        help="Consecutive seconds of speech before start",
-    )
-    parser.add_argument(
-        "--silence-seconds",
-        type=float,
-        default=0.5,
-        help="Consecutive seconds of silence before stop",
-    )
-    parser.add_argument(
-        "--before-seconds",
-        type=float,
-        default=0.5,
-        help="Seconds to record before start",
-    )
-    parser.add_argument(
-        "--sensitivity",
-        type=int,
-        choices=[1, 2, 3],
-        default=3,
-        help="VAD sensitivity (1-3)",
-    )
-    parser.add_argument(
-        "--current-threshold",
-        type=float,
-        help="Debiased energy threshold of current audio frame",
-    )
-    parser.add_argument(
-        "--max-energy",
-        type=float,
-        help="Fixed maximum energy for ratio calculation (default: observed)",
-    )
-    parser.add_argument(
-        "--max-current-ratio-threshold",
-        type=float,
-        help="Threshold of ratio between max energy and current audio frame",
-    )
-    parser.add_argument(
-        "--silence-method",
-        choices=[e.value for e in SilenceMethod],
-        default=SilenceMethod.VAD_ONLY,
-        help="Method for detecting silence",
-    )
-
-    # Splitting and trimming by silence
-    parser.add_argument(
-        "--split-dir",
-        help="Split incoming audio by silence and write WAV file(s) to directory",
-    )
-    parser.add_argument(
-        "--split-format",
-        default="{}.wav",
-        help="Format for split file names (default: '{}.wav', only with --split-dir)",
-    )
-    parser.add_argument(
-        "--trim-silence",
-        action="store_true",
-        help="Trim silence when splitting (only with --split-dir)",
-    )
-    parser.add_argument(
-        "--trim-ratio",
-        default=20.0,
-        type=float,
-        help="Max/current energy ratio used to detect silence (only with --trim-silence)",
-    )
-    parser.add_argument(
-        "--trim-chunk-size",
-        default=960,
-        type=int,
-        help="Size of audio chunks for detecting silence (only with --trim-silence)",
-    )
-    parser.add_argument(
-        "--trim-keep-before",
-        default=0,
-        type=int,
-        help="Number of audio chunks before speech to keep (only with --trim-silence)",
-    )
-    parser.add_argument(
-        "--trim-keep-after",
-        default=0,
-        type=int,
-        help="Number of audio chunks after speech to keep (only with --trim-silence)",
-    )
-
-    parser.add_argument("--quiet", action="store_true", help="Set output type to none")
-
-    parser.add_argument(
-        "--debug", action="store_true", help="Print DEBUG messages to the console"
-    )
-    args = parser.parse_args()
+    args = parse_args()
 
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
@@ -163,13 +26,17 @@ def main():
 
     _LOGGER.debug(args)
 
-    if args.quiet or (args.trim_silence and not args.split_dir):
+    if args.quiet or (args.trim_silence and not args.split_dir and args.output_type != OutputType.TRANSCRIPTION):
         args.output_type = OutputType.NONE
 
     if args.split_dir:
         # Directory to write WAV file(s) split by silence
         args.split_dir = Path(args.split_dir)
         args.split_dir.mkdir(parents=True, exist_ok=True)
+
+    whisper = None
+    if args.output_type == OutputType.TRANSCRIPTION:
+        whisper = Whisper()
 
     print("Reading raw 16Khz mono audio from stdin...", file=sys.stderr)
 
@@ -202,7 +69,7 @@ def main():
             result = recorder.process_chunk(chunk)
             output = ""
 
-            if args.output_type != OutputType.NONE:
+            if args.output_type != OutputType.NONE and args.output_type != OutputType.TRANSCRIPTION:
                 # Print voice command events
                 for event in recorder.events:
                     if event.type == VoiceCommandEventType.STARTED:
@@ -247,7 +114,24 @@ def main():
                 # Reset after voice command
                 audio_bytes = recorder.stop()
 
-                if args.split_dir:
+                if args.output_type == OutputType.TRANSCRIPTION:
+                    # Split audio
+                    if args.trim_silence:
+                        audio_bytes = trim_silence(
+                            audio_bytes,
+                            chunk_size=args.trim_chunk_size,
+                            ratio_threshold=args.trim_ratio,
+                            keep_chunks_before=args.trim_keep_before,
+                            keep_chunks_after=args.trim_keep_after,
+                        )
+
+                    try:
+                        transcription = whisper.transcribe(audio_bytes, recorder.sample_rate)
+                        _LOGGER.info(transcription)
+                    except Exception as e:
+                        _LOGGER.error(e)
+                    # split_index += 1
+                elif args.split_dir:
                     # Split audio
                     if args.trim_silence:
                         audio_bytes = trim_silence(

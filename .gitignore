@@ -8,3 +8,5 @@ coverage.xml
 .idea/
 dist/
 download/
+output/
+models/

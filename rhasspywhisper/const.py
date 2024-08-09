@@ -7,6 +7,16 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 
+class OutputType(str, Enum):
+    """Type of printed output."""
+
+    SPEECH_SILENCE = "speech_silence"
+    CURRENT_ENERGY = "current_energy"
+    MAX_CURRENT_RATIO = "max_current_ratio"
+    TRANSCRIPTION = "transcription"
+    NONE = "none"
+
+
 class VoiceCommandResult(str, Enum):
     """Success/failure of voice command recognition."""
 
